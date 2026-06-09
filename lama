@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+echo "------------Ollama model list-------------"
+echo $(ollama list | awk 'NR>1 {printf "%2d) %s\n", NR-1, $1}')
+echo
+read -p " Choose a model...(type exact name) " model
+echo
+read -p " Type in how long you want to keep the selected model in memory?(ex:(for 1hour) -> 1h,(for 30 minutes) -> 30m) " time
+for allModel in $(ollama list | awk -F: 'NR>1 {print $1}')
+do
+	if [ "$model" == "$allModel" ]
+	then
+		if command -v curl > /dev/null 2>&1
+		then
+			curl "http://localhost:11434/api/generate" -d "{\"model\":\"$model\",\"keep_alive\":\"$time\"}"
+		else
+			echo "curl command not found."
+			exit
+		fi
+	fi
+done
